@@ -1,0 +1,31 @@
+HFRAP analysis
+
+Requirements: 
+- Rstudio (version 2024.12.0+467) with dplyr package installed
+- Graphpad Prism 10
+
+1. Split the .lif file containing all the images into the individual .tif files with ImageJ/Fiji. Recommended approach: When opening a lif file, BioFormats Import Options, select Open all series and Concatenate series when compatible. Then duplicate stacks containing individual cells.
+2. For each file, measure the bleached half and non-bleached half. Make sure that Area, Mean gray value and Fit ellipse options are checked in the Set measurements menu (Analyze\Set measurements…) Split the channels to work only on the channel of interest. Draw the ROI using the freehand tool. You may have to reposition the ROI after some timepoints. You can use the measuring macro_single_step.ijm for this (attached). 
+Save the measurements individually (in the results window File\Save as... Recommended name: YYYY_MM_DD_projectID_HFRAP_cellX_bleached.csv (or _non.csv for non-bleached). It’s ok to change the names but you’ll have to adjust the scripts accordingly.
+At the end, measure the entire spot before bleaching and write down the Major and Minor axis. Place the information on the info_sheet sheet in the Excel file (attached) and in the sheet of that cell (A65/B65 – may vary dependent on the number of timepoints you have).
+3. Measure a background area. Make sure the entirety of it fits into the nucleus throughout the experiment. In that case you can use measuring_macro.ijm (attached). Remove the measurements from the bleaching frames. Save the measurements. Recommended name: YYYY_MM_DD_projectID_HFRAP_cellX_background.csv
+4. Once you measure all the files in the experiment, open Rstudio, navigate on the side panel into the folder where all the files are, and set it as a working directory. Run the script hrafp_compiling_csvs.R (attached). It will compile all the necessary info and per each analysed file will create a new csv called *filename*_compiled.csv
+5. Open the compiled.csv file. Make sure your spreadsheet reader identifies the csv correctly; set dot (.) as a decimal separator and nothing as a thousand separator (as Italian excel tends to treat (.) as a thousand separator and a comma (,) as decimal separation.) Copy the three mean values (bleached, non-bleached and background) and paste them into a new sheet of the Excel file (one sheet per cell) rows C-E. Make sure in advance that the number of rows matches the number of rows in the Excel sheet (add if you have more than 55 timepoints, delete if you have less). Copy also area_bleached and area_nonbleached and paste into the info_sheet as well as in the sheet of that cell (A63/B63 – if you changed the numbers of rows it will move accordingly).
+6. Excel will autocomplete the analysis – basically the steps are the following:
+STEP2 – substract background and correct for bleaching (using the measured background intensity) 
+STEP3 – correct for accidental bleaching of the non-bleached signal
+STEP4 – correct for differences in the size of the bleached and non-bleached area
+STEP5 – normalization of the signals (from 0 to 1)
+STEP6 (only non bleached) – reversal to get the proper values
+STEP7 – correction for the immobile fraction; normalization of the time relative to the size of the entire spot undergoing HFRAP 
+Note: for the time normalization you need the average size of the measured spots, retrieved from the info_sheet once you analyse more cells. Add them consequently and make sure there are no 0s in the H column of the info_sheet, as it will screw up the average size.
+7. Copy 3 last columns (normalized time, corrected bleached and non-bleached) from the Excel file into the .prism file – one sheet per cell (use the XY data input option).
+8. Analyze\XY analyses\Smooth, Differentiate or Integrate Curve – choose don’t differentiate or integrate, select smooth – 10 neighbors on each size, 4th order polynomials – it generates a new subfile called Smooth. As the name suggests, it smoothens the individual curves.
+9. Put together all the smoothened data one after another – for whatever reason it separates the x values for bleached and non-bleached halves you’ll have to paste them together manually so that they are in the same rows, sorry…
+IMPORTANT! Add the titles to the column headers (not critical the exact naming as the script handles the names on its own but it needs the headers per se)
+10. Export the file as .csv IMPORTANT! Select decimal separator as Period (.), otherwise it will default to a comma.
+11.  Run binning_time.R (attached) in the same folder as the exported csv file. Make sure the name matches (line 8 of the code). This code bins the timepoints for all the data you gathered and then creates an average time from the bin The output is saved as a csv file. 
+IMPORTANT! This script hard codes the number of timepoints as 10 short interval timepoints at the beginning and 40 longer interval timepoints later. If all your timepoints have exactly the same interval, this step is not necessary. If you have different number of timepoints, you have to change the number of timepoints in the script (you can use find and replace option).
+12. Run summary_binned.R (attached) in the same folder. This info will be used for plotting – all the datapoints that fall into one bin are averaged and standard deviation is calculated. The output is saved as a csv file. You can change the name of the exported file (line 29).
+13. Plot the values in Prism or any other desired way.
+
