@@ -1,6 +1,7 @@
 HFRAP analysis
 
 Requirements: 
+- Fiji/ImageJ with BioFormats plugin
 - Rstudio (version 2024.12.0+467) with dplyr package installed
 - Graphpad Prism 10
 
@@ -28,4 +29,5 @@ IMPORTANT! Add the titles to the column headers (not critical the exact naming a
 IMPORTANT! This script hard codes the number of timepoints as 10 short interval timepoints at the beginning and 40 longer interval timepoints later. If all your timepoints have exactly the same interval, this step is not necessary. If you have different number of timepoints, you have to change the number of timepoints in the script (you can use find and replace option).
 12. Run summary_binned.R (attached) in the same folder. This info will be used for plotting – all the datapoints that fall into one bin are averaged and standard deviation is calculated. The output is saved as a csv file. You can change the name of the exported file (line 29).
 13. Plot the values in Prism or any other desired way.
+
 
