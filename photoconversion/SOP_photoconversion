@@ -1,0 +1,22 @@
+Photoconversion analysis:
+
+Requirements: 
+- Fiji/ImageJ with BioFormats plugin
+- Rstudio (version 2024.12.0+467) with dplyr, readr, minpack.lm and ggplot2 package installed
+
+1. Split the .lif file containing all the images into the individual .tif files with ImageJ/Fiji. Recommended approach: When opening a lif file, BioFormats Import Options, select Open all series and Concatenate series when compatible. Then duplicate stacks containing individual cells.
+2. To analyse the file, use Fiji. Open the individual .tif file, split the channels.
+3. Analyse the green (non-converted) channel first. Using a free-hand tool, draw an ROI around the converted spot. Measure the mean gray area on pre-conversion and post-conversion frames. 
+You can use the measuring macro_single_step.ijm for this (attached). Save the measurements - (in the results window File\Save as... Recommended name: YYYY_MM_DD_projectID_FRAP_cellX_green.csv). Save the ROI - you will need it for the red (converted) channel. 
+4. Measure a background area. Make sure the entirety of it fits into the nucleus throughout the experiment. In that case you can use measuring_macro.ijm (attached). Remove the measurements from the bleaching frames. Save the measurements. Recommended name: YYYY_MM_DD_projectID_FRAP_cellX_green_background.csv. Save the ROI for the red channel.
+5. Repeat the measurements for the red (converted) channel, using the ROIs from the green (non-converted) channel. Save the measurements as YYYY_MM_DD_projectID_FRAP_cellX_red.csv and YYYY_MM_DD_projectID_FRAP_cellX_red_background.csv, respectively.
+6. Once you analysed the images from the particular folder, run collect_data2.R. It will create NAME_final_output.csv files, putting together the results in this order: green, green_background, red, red_background.
+7. Gather all final_output.csv files in one folder. Make sure these are the only csv files in this folder.
+8. Run bg_normalisation_ver2.R . This script uses green_background data to substract background from red and green signals (as the red background in my case is basically nonexistent, it doesn't work for correction of bleaching). Script adds two columns to the csv - green_corrected and red_corrected
+9. Run hybrid_normalisation.R. This normalises the corrected green values to preconversion values and normalises corrected red values to the first post-conversion frame. It adds new columns with normalized values.
+10. Run summarizing_hybrid.R - it generates mean and standard deviation values based on the all normalised files in the folder and generates a file summary_results.csv. You can change the name of the output file in line 60 of the code. You can use this data to plot it in your favorite 
+11. Run exponential_fitting.R - it will fit the exponential curve on the data from the first post-conversion frame. The estimated k fits are printed on the console - you can copy them into a new file.
+
+
+
+
